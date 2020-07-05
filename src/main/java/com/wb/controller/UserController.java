@@ -3,6 +3,7 @@ package com.wb.controller;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.Tracer;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
@@ -77,6 +78,26 @@ public class UserController {
             Tracer.trace(e);
             return "IllegalArgumentException 被限流";
         }
+    }
+
+    // 用SentinelResource方式
+    @GetMapping("getUser3")
+    @SentinelResource(value = "getUser3",blockHandler = "block",fallback = "fallback")
+    public String getUser3(@RequestParam(required = false) String name) {
+        if (name == null || name.length() == 0) {
+            throw new IllegalArgumentException("name is null");
+        }
+        return "success";
+    }
+
+    public String block(String name, BlockException e) {
+        System.out.println("限流了");
+        return "被限流";
+    }
+
+    public String fallback(String name) {
+        System.out.println("降级了");
+        return "被降级";
     }
 
     @Autowired
